@@ -22,12 +22,14 @@ def_len=3600
 stream=$1
 len=$2
 now=`date '+%Y%m%d-%H%M%S'`
+prefix=$3
 
 if [[ -z "$stream" ]]; then
     echo "ERROR: a stream URL is required."
     echo
-    echo "Usage: $0 stream [length-in-seconds]"
+    echo "Usage: $0 stream [length-in-seconds] [prefix]"
     echo "      default length: $def_len"
+    echo "      prefix will be used in place of 'recordstream' in the file name."
     exit 3
 fi
 
@@ -36,6 +38,13 @@ if [[ -z "$len" ]]; then
     len=$def_len
 fi
 
-printf "Recording $stream for %d seconds (%02dh:%02dm:%02ds)" $len $((len/3600)) $((len%3600/60)) $((len%60))
+if [[ -z "$prefix" ]]; then
+    prefix=recordstream
+fi
 
-curl -o recordstream-$now.mp3 -m $len $stream
+file=$prefix-$now.mp3
+
+printf "Recording $stream for %d seconds (%02dh:%02dm:%02ds) to %s\n\n" $len $((len/3600)) $((len%3600/60)) $((len%60)) $file
+
+curl -o $file -m $len $stream
+
